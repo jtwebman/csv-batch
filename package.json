@@ -36,5 +36,8 @@
     "nyc": "^14.1.1",
     "prettier": "^1.19.1"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "engines": {
+    "node": ">=8.16.2"
+  }
 }
