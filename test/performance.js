@@ -1,11 +1,14 @@
 'use strict';
 
 const {assert} = require('chai');
+const {range} = require('lodash');
 
 const csvBatch = require('../index');
 const createStreamFromString = require('./lib/create-stream-from-string');
 
-const millionRowCsv = [...Array(1000000).keys()].map(i => `${i},${i + 1},${i + 2}`).join('\n');
+const millionRowCsv = range(1000000)
+  .map(i => `${i},${i + 1},${i + 2}`)
+  .join('\n');
 
 describe('performance', () => {
   it('test million in 10,000 batches', () => {
