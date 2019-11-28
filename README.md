@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/jtwebman/csv-batch.svg?branch=master)](https://travis-ci.org/jtwebman/csv-batch)
 [![Coverage Status](https://coveralls.io/repos/github/jtwebman/csv-batch/badge.svg?branch=master)](https://coveralls.io/github/jtwebman/csv-batch?branch=master)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
-[![node](https://img.shields.io/node/v/attis.svg)](https://www.npmjs.org/package/csv-batch)
+[![node](https://img.shields.io/node/v/csv-batch.svg)](https://www.npmjs.org/package/csv-batch)
 [![Known Vulnerabilities](https://snyk.io/test/github/jtwebman/csv-batch/badge.svg)](https://snyk.io/test/github/jtwebman/csv-batch)
 
 This is a very fast CSV parser with batching for Node.js. It has no dependencies and is returns a promise and functions support promises and async functions so no need to learn streams!
