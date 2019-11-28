@@ -294,7 +294,7 @@ function parse(options) {
         context.currentRaw.push(cc);
       }
       if (batchTasks.length > 0) {
-        Promise.all(batchTasks).finally(() => {
+        Promise.all(batchTasks).then(() => {
           callback();
         });
       } else {
@@ -308,7 +308,7 @@ function parse(options) {
       }
       if (options.batch && context.batch.length > 0) {
         batchResults.totalRecords = batchResults.totalRecords + context.batch.length;
-        getBatchPromise(options, context, batchResults).finally(() => {
+        getBatchPromise(options, context, batchResults).then(() => {
           this.emit('results', batchResults);
           callback();
         });
