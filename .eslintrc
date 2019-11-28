@@ -1,0 +1,24 @@
+extends:
+  - google
+env:
+  node: true
+  mocha: true
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: script
+  ecmaFeatures:
+    modules: false
+rules:
+  strict:
+    - error
+    - global
+  comma-dangle: off
+  arrow-parens:
+    - error
+    - as-needed
+  max-len:
+    - error
+    - code: 120
+  indent:
+    - error
+    - 2

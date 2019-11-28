@@ -1,0 +1,36 @@
+{
+  "name": "csv-batch",
+  "version": "1.0.0",
+  "description": "Fastest CSV parser that have a batch event and no dependencies",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint . && nyc --reporter=html --reporter=text-summary mocha --recursive --timeout 5000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jtwebman/csv-batch.git"
+  },
+  "keywords": [
+    "csv",
+    "parser",
+    "fast",
+    "batch"
+  ],
+  "author": "JT Turner <jtwebman@gmail.com> (https://jtwebman.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jtwebman/csv-batch/issues"
+  },
+  "homepage": "https://github.com/jtwebman/csv-batch#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "csv-spectrum": "^1.0.0",
+    "eslint": "^6.7.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
+    "prettier": "^1.19.1"
+  },
+  "dependencies": {}
+}
