@@ -4,4 +4,4 @@ node_js:
   - 10
   - 12
   - 13
-after_success: npm run test:coveralls
+script: npm run test:coveralls
