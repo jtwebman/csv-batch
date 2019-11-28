@@ -63,4 +63,22 @@ describe('transform', () => {
       assert.equal(results.errors[0].message, 'Error on transform');
     });
   });
+
+  it('handles rejected promise with null', () => {
+    const csv = `a,b,c\n1,2,3`;
+    return csvBatch(createStreamFromString(csv), {
+      transform: () => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(null);
+          });
+        });
+      }
+    }).then(results => {
+      assert.equal(results.totalRecords, 1);
+      assert.isEmpty(results.data);
+      assert.isEmpty(results.errors);
+    });
+  });
 });

@@ -203,4 +203,146 @@ describe('batching', () => {
       assert.isEmpty(results.errors);
     });
   });
+
+  it('with transform promise', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 1,
+      batchExecution: batch => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            callCount++;
+            resolve(batch);
+          });
+        });
+      },
+      transform: record => ({
+        A: record.a,
+        B: record.b,
+        C: record.c
+      })
+    }).then(results => {
+      // console.log(`results: ${JSON.stringify(results, null, 2)}`);
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 2);
+      assert.deepEqual(results.data, [
+        [
+          {
+            A: '1',
+            B: '2',
+            C: '3'
+          }
+        ],
+        [
+          {
+            A: '4',
+            B: '5',
+            C: '6'
+          }
+        ]
+      ]);
+      assert.isEmpty(results.errors);
+    });
+  });
+
+  it('with transform batch execution returning null', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 1,
+      batchExecution: batch => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            callCount++;
+            resolve(null);
+          });
+        });
+      },
+      transform: record => ({
+        A: record.a,
+        B: record.b,
+        C: record.c
+      })
+    }).then(results => {
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 2);
+      assert.isEmpty(results.data);
+      assert.isEmpty(results.errors);
+    });
+  });
+
+  it('with transform batch execution returning empty', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 1,
+      batchExecution: batch => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            callCount++;
+            resolve();
+          });
+        });
+      },
+      transform: record => Promise.resolve()
+    }).then(results => {
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 2);
+      assert.isEmpty(results.data);
+      assert.isEmpty(results.errors);
+    });
+  });
+
+  it('with transform batch execution rejecting', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 1,
+      batchExecution: batch => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            callCount++;
+            reject(new Error(`Error on call ${callCount}`));
+          });
+        });
+      },
+      transform: record => Promise.resolve()
+    }).then(results => {
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 2);
+      assert.isEmpty(results.data);
+      assert.equal(results.errors.length, 2);
+      assert.equal(results.errors[0].message, 'Error on call 1');
+      assert.equal(results.errors[1].message, 'Error on call 2');
+    });
+  });
+
+  it('with transform batch execution rejecting null', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 1,
+      batchExecution: batch => {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            callCount++;
+            // eslint-disable-next-line prefer-promise-reject-errors
+            reject(null);
+          });
+        });
+      },
+      transform: record => Promise.resolve()
+    }).then(results => {
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 2);
+      assert.isEmpty(results.data);
+      assert.isEmpty(results.errors);
+    });
+  });
 });
