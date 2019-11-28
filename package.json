@@ -27,6 +27,7 @@
   "homepage": "https://github.com/jtwebman/csv-batch#readme",
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^3.0.9",
     "csv-spectrum": "^1.0.0",
     "eslint": "^6.7.0",
     "eslint-config-google": "^0.14.0",
