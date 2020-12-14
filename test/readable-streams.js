@@ -4,7 +4,7 @@ const {assert} = require('chai');
 const fs = require('fs');
 const zlib = require('zlib');
 const path = require('path');
-const http = require('http');
+const https = require('https');
 
 const csvBatch = require('../index');
 
@@ -50,16 +50,16 @@ describe('readable stream', () => {
     });
   });
 
-  it('http', () => {
+  it('https', () => {
     return new Promise(resolve => {
-      http.get('http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv', res => {
+      https.get('https://people.sc.fsu.edu/~jburkardt/data/csv/hw_25000.csv', res => {
         resolve(res);
       });
     })
       .then(csvBatch)
       .then(results => {
-        assert.equal(results.totalRecords, 985);
-        assert.equal(results.data.length, 985);
+        assert.equal(results.totalRecords, 25000);
+        assert.equal(results.data.length, 25000);
         assert.isEmpty(results.errors);
       });
   });

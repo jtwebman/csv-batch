@@ -1,6 +1,6 @@
 {
   "name": "csv-batch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Fast CSV parser that have a batch event and no dependencies",
   "main": "index.js",
   "scripts": {
@@ -28,13 +28,13 @@
   "homepage": "https://github.com/jtwebman/csv-batch#readme",
   "devDependencies": {
     "chai": "^4.2.0",
-    "coveralls": "^3.0.9",
+    "coveralls": "^3.1.0",
     "csv-spectrum": "^1.0.0",
-    "eslint": "^6.7.0",
+    "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "lodash": "^4.17.15",
-    "mocha": "^6.2.2",
+    "eslint-plugin-prettier": "^3.3.0",
+    "lodash": "^4.17.20",
+    "mocha": "^6.2.3",
     "nyc": "^14.1.1",
     "prettier": "^1.19.1"
   },
