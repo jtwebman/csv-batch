@@ -47,6 +47,26 @@ csvBatch(fileStream).then(results => {
 });
 ```
 
+### In-Memory but reduce results
+
+```
+const csvBatch = require('csv-batch');
+
+csvBatch(fileStream, {
+  reducerStart: {}
+  reducer: (current, record) => {
+    if (!current[record.month]) {
+      current[record.month].total = 0;
+    }
+    current[record.month].total = current[record.month].total + record.total;
+    return current;
+  }
+}).then(results => {
+  console.log(`Processed ${results.totalRecords});
+  console.log(`Final reduced value ${JSON.stringify(results.data, null, 2)});
+});
+```
+
 ## Options
 
 - `header: {boolean} = true`: When set to true will take the first column as a header and use them for the object proprty names for each record. If set to false and `columns` option isn't set each record will just be an array.
@@ -75,10 +95,14 @@ csvBatch(fileStream).then(results => {
 
 - `nullOnEmpty: {boolean} = false`: When set to true if the field is empty and didn't have a empty quotes `""` then the field will be set to null. If set to false will always be a empty string.
 
-- `transform: {Function} = record => record`: When set will be called for each record and will make the record what ever is returned. This will wait for this to return before continueing to parse and supports promises and async functions.
+- `map: {Function} = record => record`: When set will be called for each record and will make the record whatever is returned. This will wait for this to return before continueing to parse and supports promises and async functions. If this returns undefined or null the record is skipped and not counted a a record.
 
 - `batch: {boolean} = false`: When set to true will turn on batch mode and will call the batch execution function for each batch waiting for it to finish to continue parsings.
 
 - `batchSize: {Number} = 10000`: The number of records to include into each batch when running in batch mode.
 
 - `batchExecution: {Function} = batch => batch`: The function that is called for each batch that supports promises and async functions. The csv parser will wait for each batch to finish before moving on in parsing to not have to load the whole file in memory.
+
+- `getInitialValue: {Function} = () => []`: This is the function called to get the initial value for the reducer. It by default is a empty array as the default is just an array of all the values resolved. The reason this is a function as it is used in each batch too so could be called mutiple times.
+
+- `reducer: {Function} = (current, record, index) => { current.push(record); return current; }`: This is the reducer function. By default it just takes the current record and just builds an array. You can use this function to do aggregations instead for just getting the records. The index is the current record count for the whole stream not the batch if doing batching

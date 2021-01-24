@@ -5,11 +5,11 @@ const {assert} = require('chai');
 const csvBatch = require('../index');
 const createStreamFromString = require('./lib/create-stream-from-string');
 
-describe('transform', () => {
+describe('map', () => {
   it('lets you alter each record', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     return csvBatch(createStreamFromString(csv), {
-      transform: record => ({
+      map: record => ({
         a: Number.parseInt(record.a, 10),
         b: Number.parseInt(record.b, 10),
         c: Number.parseInt(record.c, 10)
@@ -35,21 +35,22 @@ describe('transform', () => {
   it('handles thrown error', () => {
     const csv = `a,b,c\n1,2,3`;
     return csvBatch(createStreamFromString(csv), {
-      transform: () => {
+      map: () => {
         throw new Error('Error on transform');
       }
     }).then(results => {
-      assert.equal(results.totalRecords, 1);
+      assert.equal(results.totalRecords, 0);
       assert.isEmpty(results.data);
       assert.equal(results.errors.length, 1);
-      assert.equal(results.errors[0].message, 'Error on transform');
+      assert.equal(results.errors[0].line, 2);
+      assert.equal(results.errors[0].error.message, 'Error on transform');
     });
   });
 
   it('handles rejected promise', () => {
     const csv = `a,b,c\n1,2,3`;
     return csvBatch(createStreamFromString(csv), {
-      transform: () => {
+      map: () => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             reject(new Error('Error on transform'));
@@ -57,17 +58,18 @@ describe('transform', () => {
         });
       }
     }).then(results => {
-      assert.equal(results.totalRecords, 1);
+      assert.equal(results.totalRecords, 0);
       assert.isEmpty(results.data);
       assert.equal(results.errors.length, 1);
-      assert.equal(results.errors[0].message, 'Error on transform');
+      assert.equal(results.errors[0].line, 2);
+      assert.equal(results.errors[0].error.message, 'Error on transform');
     });
   });
 
   it('handles rejected promise with null', () => {
     const csv = `a,b,c\n1,2,3`;
     return csvBatch(createStreamFromString(csv), {
-      transform: () => {
+      map: () => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             // eslint-disable-next-line prefer-promise-reject-errors
@@ -76,7 +78,7 @@ describe('transform', () => {
         });
       }
     }).then(results => {
-      assert.equal(results.totalRecords, 1);
+      assert.equal(results.totalRecords, 0);
       assert.isEmpty(results.data);
       assert.isEmpty(results.errors);
     });

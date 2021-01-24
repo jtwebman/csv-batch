@@ -204,7 +204,7 @@ describe('batching', () => {
     });
   });
 
-  it('with transform promise', () => {
+  it('with map promise', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     let callCount = 0;
     return csvBatch(createStreamFromString(csv), {
@@ -218,13 +218,12 @@ describe('batching', () => {
           });
         });
       },
-      transform: record => ({
+      map: record => ({
         A: record.a,
         B: record.b,
         C: record.c
       })
     }).then(results => {
-      // console.log(`results: ${JSON.stringify(results, null, 2)}`);
       assert.equal(callCount, 2);
       assert.equal(results.totalRecords, 2);
       assert.deepEqual(results.data, [
@@ -247,7 +246,7 @@ describe('batching', () => {
     });
   });
 
-  it('with transform batch execution returning null', () => {
+  it('with map batch execution returning null', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     let callCount = 0;
     return csvBatch(createStreamFromString(csv), {
@@ -261,7 +260,7 @@ describe('batching', () => {
           });
         });
       },
-      transform: record => ({
+      map: record => ({
         A: record.a,
         B: record.b,
         C: record.c
@@ -274,75 +273,51 @@ describe('batching', () => {
     });
   });
 
-  it('with transform batch execution returning empty', () => {
+  it('with map returning nothing batch execution returning empty', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     let callCount = 0;
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+      batchExecution: () => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve();
           });
         });
       },
-      transform: record => Promise.resolve()
+      map: () => Promise.resolve()
     }).then(results => {
-      assert.equal(callCount, 2);
-      assert.equal(results.totalRecords, 2);
+      assert.equal(callCount, 0);
+      assert.equal(results.totalRecords, 0);
       assert.isEmpty(results.data);
       assert.isEmpty(results.errors);
     });
   });
 
-  it('with transform batch execution rejecting', () => {
+  it('with map batch execution rejecting', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     let callCount = 0;
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+      batchExecution: batch => Promise.resolve(),
+      map: () => {
+        return new Promise((_resolve, reject) => {
           setTimeout(() => {
             callCount++;
             reject(new Error(`Error on call ${callCount}`));
           });
         });
-      },
-      transform: record => Promise.resolve()
+      }
     }).then(results => {
       assert.equal(callCount, 2);
-      assert.equal(results.totalRecords, 2);
+      assert.equal(results.totalRecords, 0);
       assert.isEmpty(results.data);
       assert.equal(results.errors.length, 2);
-      assert.equal(results.errors[0].message, 'Error on call 1');
-      assert.equal(results.errors[1].message, 'Error on call 2');
-    });
-  });
-
-  it('with transform batch execution rejecting null', () => {
-    const csv = `a,b,c\n1,2,3\n4,5,6`;
-    let callCount = 0;
-    return csvBatch(createStreamFromString(csv), {
-      batch: true,
-      batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            callCount++;
-            // eslint-disable-next-line prefer-promise-reject-errors
-            reject(null);
-          });
-        });
-      },
-      transform: record => Promise.resolve()
-    }).then(results => {
-      assert.equal(callCount, 2);
-      assert.equal(results.totalRecords, 2);
-      assert.isEmpty(results.data);
-      assert.isEmpty(results.errors);
+      assert.equal(results.errors[0].error.message, 'Error on call 1');
+      assert.equal(results.errors[1].error.message, 'Error on call 2');
     });
   });
 });

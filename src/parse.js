@@ -109,51 +109,50 @@ function addToRecord(options, context) {
 }
 
 /**
- * gets a transform promise if options.transform is set
+ * Gets the record and then calls the map function
  * @param {Object} options - csv parsing options
  * @param {Object} context - context of the current parse state
  * @param {Object} batchResults - final results object
- * @return {Promise} - a promise that wrappes the transform function
+ * @return {Promise<*>} - a promise that resolves to the map function
  */
-function getTransformPromise(options, context, batchResults) {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(options.transform(makeRecord(options, context)));
-    } catch (error) {
-      reject(error);
-    }
-  }).catch(error => {
+async function getMapRecord(options, context, batchResults) {
+  try {
+    return await options.map(makeRecord(options, context));
+  } catch (error) {
     if (typeof error !== 'undefined' && error !== null) {
-      batchResults.errors.push(error);
+      batchResults.errors.push({
+        line: context.currentLine,
+        error
+      });
     }
-  });
+  }
 }
 
 /**
- * Finish the record adding the batch in not the header
+ * Finish the record adding the batch in ignoring the header
  * @param {Object} options - csv parsing options
  * @param {Object} context - context of the current parse state
  * @param {Object} batchResults - final results object
  */
-function finishRecord(options, context, batchResults) {
+async function finishRecord(options, context, batchResults) {
   if (!isHeader(options, context)) {
-    if (options.transform) {
-      context.batch.push(getTransformPromise(options, context, batchResults));
-    } else {
-      context.batch.push(makeRecord(options, context));
+    const record = await getMapRecord(options, context, batchResults);
+    if (typeof record !== 'undefined' && record !== null) {
+      try {
+        const index = context.processedRecords + 1;
+        context.batch = await options.reducer(context.batch, record, index);
+        context.processedRecords = index;
+        context.batchRecords = context.batchRecords + 1;
+      } catch (error) {
+        batchResults.errors.push({
+          line: context.currentLine,
+          error
+        });
+      }
     }
   }
   context.currentRecord = [];
   context.currentRaw = [];
-}
-
-/**
- * Resolves all the records and then filters out any null or undefined values
- * @param {Array.<Promise>} records - records that need to be resolved and filtered
- * @return {Promise} - resolves with the values filtered
- */
-function resolveBatchTransforms(records) {
-  return Promise.all(records).then(values => values.filter(value => typeof value !== 'undefined' && value !== null));
 }
 
 /**
@@ -163,38 +162,17 @@ function resolveBatchTransforms(records) {
  * @param {Object} batchResults - final results object
  * @return {Promise} - a promise that resolves adding the the batchResults
  */
-function getBatchPromise(options, context, batchResults) {
-  if (options.transform) {
-    return resolveBatchTransforms(context.batch)
-      .then(options.batchExecution)
-      .then(result => {
-        if (typeof result !== 'undefined' && result !== null) {
-          batchResults.data.push(result);
-        }
-      })
-      .catch(error => {
-        if (typeof error !== 'undefined' && error !== null) {
-          batchResults.errors.push(error);
-        }
-      });
-  }
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(options.batchExecution(context.batch));
-    } catch (error) {
-      reject(error);
+async function getBatch(options, context, batchResults) {
+  try {
+    const result = await options.batchExecution(context.batch);
+    if (typeof result !== 'undefined' && result !== null) {
+      batchResults.data.push(result);
     }
-  })
-    .then(result => {
-      if (typeof result !== 'undefined' && result !== null) {
-        batchResults.data.push(result);
-      }
-    })
-    .catch(error => {
-      if (typeof error !== 'undefined' && error !== null) {
-        batchResults.errors.push(error);
-      }
-    });
+  } catch (error) {
+    if (typeof error !== 'undefined' && error !== null) {
+      batchResults.errors.push(error);
+    }
+  }
 }
 
 /**
@@ -202,13 +180,12 @@ function getBatchPromise(options, context, batchResults) {
  * @param {Object} options - csv parsing options
  * @param {Object} context - context of the current parse state
  * @param {Object} batchResults - final results object
- * @param {Array.<Promise>} batchTasks - batch tasks
  */
-function doBatching(options, context, batchResults, batchTasks) {
-  if (options.batch && context.batch.length >= options.batchSize) {
-    batchResults.totalRecords = batchResults.totalRecords + context.batch.length;
-    batchTasks.push(getBatchPromise(options, context, batchResults));
-    context.batch = [];
+async function doBatching(options, context, batchResults) {
+  if (options.batch && context.batchRecords >= options.batchSize) {
+    await getBatch(options, context, batchResults);
+    context.batchRecords = 0;
+    context.batch = options.getInitialValue();
   }
 }
 
@@ -225,7 +202,9 @@ function parse(options) {
     currentRaw: [],
     currentValueHadEmpty: false,
     inQuote: false,
-    batch: []
+    batch: options.getInitialValue(),
+    batchRecords: 0,
+    processedRecords: 0
   };
   const batchResults = {
     totalRecords: 0,
@@ -234,99 +213,85 @@ function parse(options) {
   };
   return new Writable({
     writableObjectMode: true,
-    write(chunk, encoding, callback) {
-      const batchTasks = [];
-      let value = chunk;
-      if (encoding === 'buffer') {
-        const decoder = new StringDecoder();
-        value = decoder.write(chunk);
-      }
-      const valueLength = value.length;
-      for (let i = 0; i < valueLength; i++) {
-        const cc = value.charAt(i);
-        const nc = value.charAt(i + 1);
-
-        if (cc === options.quote && context.inQuote && nc === options.quote) {
-          context.currentValue.push(options.quote);
-          context.currentRaw.push(cc, nc);
-          i++;
-          continue;
+    write: async (chunk, encoding, callback) => {
+      try {
+        let value = chunk;
+        if (encoding === 'buffer') {
+          const decoder = new StringDecoder();
+          value = decoder.write(chunk);
         }
+        const valueLength = value.length;
+        for (let i = 0; i < valueLength; i++) {
+          const cc = value.charAt(i);
+          const nc = value.charAt(i + 1);
 
-        if (cc === options.quote && !context.inQuote && nc === options.quote) {
-          context.currentValueHadEmpty = true;
-        }
+          if (cc === options.quote && context.inQuote && nc === options.quote) {
+            context.currentValue.push(options.quote);
+            context.currentRaw.push(cc, nc);
+            i++;
+            continue;
+          }
 
-        if (cc === options.quote) {
-          context.inQuote = !context.inQuote;
+          if (cc === options.quote && !context.inQuote && nc === options.quote) {
+            context.currentValueHadEmpty = true;
+          }
+
+          if (cc === options.quote) {
+            context.inQuote = !context.inQuote;
+            context.currentRaw.push(cc);
+            continue;
+          }
+
+          if (cc === options.delimiter && !context.inQuote) {
+            addToRecord(options, context);
+            context.currentRaw.push(cc);
+            continue;
+          }
+
+          if (cc === '\r' && nc === '\n' && !context.inQuote) {
+            addToRecord(options, context);
+            await finishRecord(options, context, batchResults);
+            await doBatching(options, context, batchResults);
+            i++;
+            context.currentLine++;
+            continue;
+          }
+
+          if ((cc === '\n' || cc === '\r') && !context.inQuote) {
+            addToRecord(options, context);
+            await finishRecord(options, context, batchResults);
+            await doBatching(options, context, batchResults);
+            context.currentLine++;
+            continue;
+          }
+
+          if ((cc === '\r' && nc === '\n') || cc === '\n' || cc === '\r') {
+            context.currentLine++;
+          }
+
+          context.currentValue.push(cc);
           context.currentRaw.push(cc);
-          continue;
         }
-
-        if (cc === options.delimiter && !context.inQuote) {
-          addToRecord(options, context);
-          context.currentRaw.push(cc);
-          continue;
-        }
-
-        if (cc === '\r' && nc === '\n' && !context.inQuote) {
-          addToRecord(options, context);
-          finishRecord(options, context, batchResults);
-          doBatching(options, context, batchResults, batchTasks);
-          i++;
-          context.currentLine++;
-          continue;
-        }
-
-        if ((cc === '\n' || cc === '\r') && !context.inQuote) {
-          addToRecord(options, context);
-          finishRecord(options, context, batchResults);
-          doBatching(options, context, batchResults, batchTasks);
-          context.currentLine++;
-          continue;
-        }
-
-        if ((cc === '\r' && nc === '\n') || cc === '\n' || cc === '\r') {
-          context.currentLine++;
-        }
-
-        context.currentValue.push(cc);
-        context.currentRaw.push(cc);
-      }
-      if (batchTasks.length > 0) {
-        Promise.all(batchTasks).then(() => {
-          callback();
-        });
-      } else {
         callback();
+      } catch (error) {
+        callback(error);
       }
     },
-    final(callback) {
-      if (context.currentRecord.length > 0 || context.currentValue.length > 0) {
-        addToRecord(options, context);
-        finishRecord(options, context, batchResults);
-      }
-      if (options.batch && context.batch.length > 0) {
-        batchResults.totalRecords = batchResults.totalRecords + context.batch.length;
-        getBatchPromise(options, context, batchResults).then(() => {
-          this.emit('results', batchResults);
-          callback();
-        });
-      } else {
+    final: async function(callback) {
+      try {
+        if (context.currentRecord.length > 0 || context.currentValue.length > 0) {
+          addToRecord(options, context);
+          await finishRecord(options, context, batchResults);
+        }
+        await doBatching(options, context, batchResults);
         if (!options.batch) {
-          batchResults.totalRecords = context.batch.length;
           batchResults.data = context.batch;
         }
-        if (options.transform) {
-          resolveBatchTransforms(context.batch).then(batch => {
-            batchResults.data = batch;
-            this.emit('results', batchResults);
-            callback();
-          });
-        } else {
-          this.emit('results', batchResults);
-          callback();
-        }
+        batchResults.totalRecords = context.processedRecords;
+        this.emit('results', batchResults);
+        callback();
+      } catch (error) {
+        callback(error);
       }
     }
   });

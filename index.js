@@ -9,10 +9,15 @@ const defaultOptions = {
   quote: '"',
   detail: false,
   nullOnEmpty: false,
-  transform: null,
+  map: record => record,
   batch: false,
   batchSize: 10000,
-  batchExecution: batch => batch
+  batchExecution: batch => batch,
+  getInitialValue: () => [],
+  reducer: (current, record) => {
+    current.push(record);
+    return current;
+  }
 };
 
 /**
@@ -21,7 +26,7 @@ const defaultOptions = {
  * @param {Object} overrides - overrides default options
  * @return {Promise} - a promise the resolves when all the batches finish or rejects if there was an error
  */
-function csvBatch(readStream, overrides) {
+async function csvBatch(readStream, overrides) {
   const options = Object.assign({}, defaultOptions, overrides);
   return new Promise((resolve, reject) => {
     const parser = parse(options);
