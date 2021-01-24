@@ -50,16 +50,16 @@ describe('readable stream', () => {
     });
   });
 
-  it('http', () => {
+  it('https', () => {
     return new Promise(resolve => {
-      https.get('https://api.qri.cloud/get/akhazan/sacramentorealestatetransactions/body.csv?all=true', res => {
+      https.get('https://people.sc.fsu.edu/~jburkardt/data/csv/hw_25000.csv', res => {
         resolve(res);
       });
     })
       .then(csvBatch)
       .then(results => {
-        assert.equal(results.totalRecords, 975);
-        assert.equal(results.data.length, 975);
+        assert.equal(results.totalRecords, 25000);
+        assert.equal(results.data.length, 25000);
         assert.isEmpty(results.errors);
       });
   });
