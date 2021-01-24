@@ -53,7 +53,7 @@ csvBatch(fileStream).then(results => {
 const csvBatch = require('csv-batch');
 
 csvBatch(fileStream, {
-  reducerStart: {}
+  getInitialValue: () => ({}),
   reducer: (current, record) => {
     if (!current[record.month]) {
       current[record.month].total = 0;
