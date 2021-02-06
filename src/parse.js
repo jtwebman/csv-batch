@@ -283,7 +283,9 @@ function parse(options) {
           addToRecord(options, context);
           await finishRecord(options, context, batchResults);
         }
-        await doBatching(options, context, batchResults);
+        if (options.batch && context.batchRecords > 0) {
+          await getBatch(options, context, batchResults);
+        }
         if (!options.batch) {
           batchResults.data = context.batch;
         }

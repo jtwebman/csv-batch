@@ -320,4 +320,22 @@ describe('batching', () => {
       assert.equal(results.errors[1].error.message, 'Error on call 2');
     });
   });
+
+  it('works if batch size does not match row count exactly', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6\n7,8,9`;
+    let callCount = 0;
+    return csvBatch(createStreamFromString(csv), {
+      batch: true,
+      batchSize: 2,
+      batchExecution: batch => {
+        callCount++;
+        return `processed batch ${callCount} size ${batch.length}`;
+      }
+    }).then(results => {
+      assert.equal(callCount, 2);
+      assert.equal(results.totalRecords, 3);
+      assert.deepEqual(results.data, ['processed batch 1 size 2', 'processed batch 2 size 1']);
+      assert.isEmpty(results.errors);
+    });
+  });
 });
