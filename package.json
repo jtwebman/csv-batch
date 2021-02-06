@@ -1,6 +1,6 @@
 {
   "name": "csv-batch",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Fast CSV parser that can batch events, reduce on rows, and no dependencies",
   "main": "index.js",
   "scripts": {
