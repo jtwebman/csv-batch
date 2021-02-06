@@ -180,9 +180,13 @@ async function getBatch(options, context, batchResults) {
  * @param {Object} options - csv parsing options
  * @param {Object} context - context of the current parse state
  * @param {Object} batchResults - final results object
+ * @param {boolean} isFinalChunk - boolean indicating whether this is the last chunk to be processed (default false)
  */
-async function doBatching(options, context, batchResults) {
-  if (options.batch && context.batchRecords >= options.batchSize) {
+async function doBatching(options, context, batchResults, isFinalChunk = false) {
+  if (
+    options.batch &&
+    (context.batchRecords >= options.batchSize || (isFinalChunk === true && context.batchRecords > 0))
+  ) {
     await getBatch(options, context, batchResults);
     context.batchRecords = 0;
     context.batch = options.getInitialValue();
@@ -283,7 +287,7 @@ function parse(options) {
           addToRecord(options, context);
           await finishRecord(options, context, batchResults);
         }
-        await doBatching(options, context, batchResults);
+        await doBatching(options, context, batchResults, true);
         if (!options.batch) {
           batchResults.data = context.batch;
         }
