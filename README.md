@@ -10,9 +10,11 @@ This is a very fast CSV parser with batching for Node.js. It has no dependencies
 
 All it returns is a single function that takes a readable Node.js stream like a file stream and options and then resolves once parsed or
 allows you to batch records and call a function for each batch. It will wait for the batch function to return resolved before moving on
-so you will not waster memory loading the whole CSV in-memory.
+so you will not wast memory loading the whole CSV in-memory.
 
 If you don't turn on batching then it works like most other csv parsers and does it all in memory.
+
+It also supports reducing on the records as they are processed so you could do aggregations instead of just returning the rcords. Recuser is also supported for each batch if you wanted.
 
 ## Install
 

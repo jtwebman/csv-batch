@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "eslint . && nyc --reporter=html --reporter=text-summary mocha --recursive --timeout 10000",
-    "test:coveralls": "nyc --reporter=lcov mocha --recursive --timeout 10000 && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "test:coveralls": "eslint . && nyc --reporter=lcov mocha --recursive --timeout 10000 && cat ./coverage/lcov.info | ./node_modules/coveralls-next/bin/coveralls.js"
   },
   "repository": {
     "type": "git",
