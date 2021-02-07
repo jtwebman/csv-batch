@@ -52,7 +52,7 @@ describe('readable stream', () => {
 
   it('https', () => {
     return new Promise(resolve => {
-      https.get('https://people.sc.fsu.edu/~jburkardt/data/csv/hw_25000.csv', res => {
+      https.get('https://raw.githubusercontent.com/jtwebman/csv-batch/master/test/files/hw_25000.csv', res => {
         resolve(res);
       });
     })
