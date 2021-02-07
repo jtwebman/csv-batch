@@ -211,14 +211,13 @@ function parse(options) {
     data: [],
     errors: []
   };
+  const decoder = new StringDecoder();
   return new Writable({
-    writableObjectMode: true,
     write: async (chunk, encoding, callback) => {
       try {
         let value = chunk;
         if (encoding === 'buffer') {
-          const decoder = new StringDecoder();
-          value = decoder.write(chunk);
+          value = decoder.end(chunk);
         }
         const valueLength = value.length;
         for (let i = 0; i < valueLength; i++) {
