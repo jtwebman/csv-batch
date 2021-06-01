@@ -1,7 +1,7 @@
 name: test
 
 # Run this workflow every time a new commit pushed to your repository
-on: ["push", "pull_request"]
+on: ['push', 'pull_request']
 
 jobs:
   # Set the job key. The key is displayed as the job name
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        node-version: [10.x, 12.x, 14.x, 16.x, 17.x, 18.x]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
