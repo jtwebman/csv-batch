@@ -14,7 +14,7 @@ so you will not wast memory loading the whole CSV in-memory.
 
 If you don't turn on batching then it works like most other csv parsers and does it all in memory.
 
-It also supports reducing on the records as they are processed so you could do aggregations instead of just returning the rcords. Recuser is also supported for each batch if you wanted.
+It also supports reducing on the records as they are processed so you could do aggregations instead of just returning the records. Reducing is also supported for each batch if you wanted.
 
 ## Install
 
