@@ -100,6 +100,26 @@ describe('basic', () => {
     });
   });
 
+  it('can override column headers', () => {
+    const csv = `a,b,c\n1,2,3\n4,5,6`;
+    return csvBatch(createStreamFromString(csv), {header: true, columns: ['col1', 'col2', 'col3']}).then(results => {
+      assert.equal(results.totalRecords, 2);
+      assert.deepEqual(results.data, [
+        {
+          col1: '1',
+          col2: '2',
+          col3: '3'
+        },
+        {
+          col1: '4',
+          col2: '5',
+          col3: '6'
+        }
+      ]);
+      assert.isEmpty(results.errors);
+    });
+  });
+
   it('detail turned on', () => {
     const csv = `a,b,c\n1,2,3\n4,5,6`;
     return csvBatch(createStreamFromString(csv), {detail: true}).then(results => {
@@ -154,9 +174,9 @@ describe('basic', () => {
       assert.equal(results.totalRecords, 1);
       assert.deepEqual(results.data, [
         {
-          '1': '4',
-          '2': '5',
-          '3': '6'
+          1: '4',
+          2: '5',
+          3: '6'
         }
       ]);
       assert.isEmpty(results.errors);

@@ -69,9 +69,11 @@ function isHeader(options, context) {
     // not first line never the header
     return false;
   }
-  if (context.currentLine === 1 && options.header) {
+  if (options.header) {
     // first line is header use as columns
-    options.columns = context.currentRecord;
+    if (options.columns.length === 0) {
+      options.columns = context.currentRecord;
+    }
     return true;
   }
   if (!Array.isArray(options.columns)) {
@@ -276,7 +278,7 @@ function parse(options) {
         callback(error);
       }
     },
-    final: async function(callback) {
+    final: async function (callback) {
       try {
         if (context.currentRecord.length > 0 || context.currentValue.length > 0) {
           addToRecord(options, context);
