@@ -1,3 +1,4 @@
+.github
 .DS_Store
 *.log
 node_modules/
@@ -5,7 +6,7 @@ coverage/
 test/
 .editorconfig
 .eslintignore
-.eslintrc
+.eslintrc.yaml
 .nycrc
 .prettierrc
 .travis.yml
