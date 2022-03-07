@@ -27,3 +27,4 @@ rules:
     - anonymous: always
       named: never
       asyncArrow: ignore
+  linebreak-style: off
