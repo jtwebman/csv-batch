@@ -1,15 +1,11 @@
 name: test
 
-# Run this workflow every time a new commit pushed to your repository
 on: ['push', 'pull_request']
 
 jobs:
-  # Set the job key. The key is displayed as the job name
-  # when a job name is not provided
   test:
-    # Name the Job
-    name: Test
-    # Set the type of machine to run on
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
