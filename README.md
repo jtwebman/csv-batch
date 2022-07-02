@@ -6,11 +6,11 @@
 [![node](https://img.shields.io/node/v/csv-batch.svg)](https://www.npmjs.org/package/csv-batch)
 [![Known Vulnerabilities](https://snyk.io/test/github/jtwebman/csv-batch/badge.svg)](https://snyk.io/test/github/jtwebman/csv-batch)
 
-This is a very fast CSV parser with batching for Node.js. It has no dependencies and is returns a promise and functions support promises and async functions so no need to learn streams!
+This is a very fast CSV parser with batching for Node.js. It has no dependencies and it returns a promise and functions support promises and async functions so no need to learn streams!
 
 All it returns is a single function that takes a readable Node.js stream like a file stream and options and then resolves once parsed or
 allows you to batch records and call a function for each batch. It will wait for the batch function to return resolved before moving on
-so you will not wast memory loading the whole CSV in-memory.
+so you will not waste memory loading the whole CSV in-memory.
 
 If you don't turn on batching then it works like most other csv parsers and does it all in memory.
 
@@ -79,7 +79,7 @@ csvBatch(fileStream, {
 
 - `quote: {string} = '"'`: This is the character you use to go in and out of quote mode where new lines and delimiter is ignored. If in quote mode to display this character you need to repeat it twice. **This will always need to be one character only!**
 
-- `detail: {boolean} = false`: When set to true each record isn't the parsed data but a object with the line number it ended on, the raw string for the record, and a data property with the object or array of the record.
+- `detail: {boolean} = false`: When set to true each record isn't just the parsed data but a object with the line number it ended on, the raw string for the record, and a data property with the object or array of the record. this can be used for better error handling.
 
   - **Example:**
 
@@ -97,7 +97,7 @@ csvBatch(fileStream, {
 
 - `nullOnEmpty: {boolean} = false`: When set to true if the field is empty and didn't have a empty quotes `""` then the field will be set to null. If set to false will always be a empty string.
 
-- `map: {Function} = record => record`: When set will be called for each record and will make the record whatever is returned. This will wait for this to return before continueing to parse and supports promises and async functions. If this returns undefined or null the record is skipped and not counted a a record.
+- `map: {Function} = record => record`: When set will be called for each record and will make the record whatever is returned. This will wait for this to return before continueing to parse and supports promises and async functions. If this returns undefined or null the record is skipped and not counted as a record.
 
 - `batch: {boolean} = false`: When set to true will turn on batch mode and will call the batch execution function for each batch waiting for it to finish to continue parsings.
 
