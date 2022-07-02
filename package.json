@@ -1,6 +1,6 @@
 {
   "name": "csv-batch",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Fast CSV parser that can batch events, reduce on rows, and no dependencies",
   "main": "index.js",
   "scripts": {
@@ -28,13 +28,13 @@
   "devDependencies": {
     "chai": "4.3.6",
     "csv-spectrum": "1.0.0",
-    "eslint": "8.10.0",
+    "eslint": "8.19.0",
     "eslint-config-google": "0.14.0",
-    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-prettier": "4.2.1",
     "lodash": "4.17.21",
-    "mocha": "9.2.1",
+    "mocha": "10.0.0",
     "nyc": "15.1.0",
-    "prettier": "2.5.1"
+    "prettier": "2.7.1"
   },
   "dependencies": {},
   "engines": {
