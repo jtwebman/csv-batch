@@ -34,7 +34,7 @@ csvBatch(fileStream, {
   batchSize: 10000,
   batchExecution: batch => addToDatabase(batch)
 }).then(results => {
-  console.log(`Processed ${results.totalRecords});
+  console.log(`Processed ${results.totalRecords}`);
 });
 ```
 
@@ -44,8 +44,8 @@ csvBatch(fileStream, {
 const csvBatch = require('csv-batch');
 
 csvBatch(fileStream).then(results => {
-  console.log(`Processed ${results.totalRecords});
-  console.log(`CSV as JSON ${JSON.stringify(results.data, null, 2)});
+  console.log(`Processed ${results.totalRecords}`);
+  console.log(`CSV as JSON ${JSON.stringify(results.data, null, 2)}`);
 });
 ```
 
@@ -64,8 +64,8 @@ csvBatch(fileStream, {
     return current;
   }
 }).then(results => {
-  console.log(`Processed ${results.totalRecords});
-  console.log(`Final reduced value ${JSON.stringify(results.data, null, 2)});
+  console.log(`Processed ${results.totalRecords})`;
+  console.log(`Final reduced value ${JSON.stringify(results.data, null, 2)}`);
 });
 ```
 
