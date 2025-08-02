@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 'use strict';
 
 const spectrum = require('csv-spectrum');

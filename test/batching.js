@@ -31,7 +31,7 @@ describe('batching', () => {
       batch: true,
       batchSize: 1,
       batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve(`processed batch ${callCount} size ${batch.length}`);
@@ -52,8 +52,8 @@ describe('batching', () => {
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+      batchExecution: () => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve();
@@ -74,8 +74,8 @@ describe('batching', () => {
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+      batchExecution: () => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve(null);
@@ -101,7 +101,6 @@ describe('batching', () => {
           setTimeout(() => {
             callCount++;
             if (callCount === 1) {
-              // eslint-disable-next-line prefer-promise-reject-errors
               reject(`error on batch ${callCount} size ${batch.length}`);
             } else {
               resolve(`processed batch ${callCount} size ${batch.length}`);
@@ -126,7 +125,6 @@ describe('batching', () => {
       batchExecution: batch => {
         callCount++;
         if (callCount === 1) {
-          // eslint-disable-next-line no-throw-literal
           throw `error on batch ${callCount} size ${batch.length}`;
         }
         return `processed batch ${callCount} size ${batch.length}`;
@@ -150,7 +148,6 @@ describe('batching', () => {
           setTimeout(() => {
             callCount++;
             if (callCount === 1) {
-              // eslint-disable-next-line prefer-promise-reject-errors
               reject(null);
             } else {
               resolve(`processed batch ${callCount} size ${batch.length}`);
@@ -211,7 +208,7 @@ describe('batching', () => {
       batch: true,
       batchSize: 1,
       batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve(batch);
@@ -252,8 +249,8 @@ describe('batching', () => {
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => {
-        return new Promise((resolve, reject) => {
+      batchExecution: () => {
+        return new Promise(resolve => {
           setTimeout(() => {
             callCount++;
             resolve(null);
@@ -302,7 +299,7 @@ describe('batching', () => {
     return csvBatch(createStreamFromString(csv), {
       batch: true,
       batchSize: 1,
-      batchExecution: batch => Promise.resolve(),
+      batchExecution: () => Promise.resolve(),
       map: () => {
         return new Promise((_resolve, reject) => {
           setTimeout(() => {

@@ -2,3 +2,7 @@
 *.log
 node_modules/
 coverage/
+
+# Benchmark data files (but keep markdown reports)
+benchmark/results/*.csv
+benchmark/data/litmus_*.csv

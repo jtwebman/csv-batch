@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: csv-bench-postgres
+    environment:
+      POSTGRES_DB: benchmark
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: bench123
+    ports:
+      - "5432:5432"
+    command: >
+      postgres
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c maintenance_work_mem=256MB
+      -c work_mem=64MB
+      -c max_wal_size=2GB
+      -c checkpoint_completion_target=0.9
+      -c synchronous_commit=off
+      -c wal_buffers=16MB
+      -c max_connections=200
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bench -d benchmark"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  mysql:
+    image: mysql:8.0
+    container_name: csv-bench-mysql
+    environment:
+      MYSQL_DATABASE: benchmark
+      MYSQL_USER: bench
+      MYSQL_PASSWORD: bench123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3306:3306"
+    command: >
+      --innodb_buffer_pool_size=512M
+      --innodb_log_file_size=256M
+      --innodb_flush_log_at_trx_commit=2
+      --innodb_flush_method=O_DIRECT
+      --max_connections=200
+      --innodb_doublewrite=0
+      --innodb_write_io_threads=16
+      --innodb_read_io_threads=16
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/mysql

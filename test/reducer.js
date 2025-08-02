@@ -73,7 +73,7 @@ describe('reducer', () => {
     const csv = `year,month,amount\n2020,12,34\n2021,1,22\n2020,12,-15`;
     return csvBatch(createStreamFromString(csv), {
       getInitialValue: () => ({}),
-      reducer: (current, record, index) => {
+      reducer: (current, record) => {
         return new Promise(resolve => {
           setTimeout(() => {
             const amount = parseInt(record.amount, 10);
@@ -106,7 +106,7 @@ describe('reducer', () => {
     const csv = `year,month,amount\n2020,12,34\n2021,1,22\n2020,12,bad`;
     return csvBatch(createStreamFromString(csv), {
       getInitialValue: () => ({}),
-      reducer: (current, record, index) => {
+      reducer: (current, record) => {
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             const amount = parseInt(record.amount, 10);
